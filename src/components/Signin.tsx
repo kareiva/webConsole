@@ -21,6 +21,10 @@ interface FieldState {
   value: string
 }
 
+// remembered SSH host key fingerprints, like ~/.ssh/known_hosts
+const hostKeyItem = (host: unknown, port: unknown) =>
+  `ssh.hostkey.${host}:${port}`
+
 export const checkHostFormat = (host: string) => {
   if (!host || host === '') {
     return [false, '', 0]
@@ -188,8 +192,10 @@ const Signin = (props: RouteComponentProps) => {
         port: port,
         username: unameField.value,
         passwd: passwdField,
+        hostkey: localStorage.getItem(hostKeyItem(host, port)) || '',
       })
       .then((response) => {
+        let retry = false
         try {
           if (!response.data || response.data.has_error) {
             // self.$Loading.error();
@@ -203,6 +209,44 @@ const Signin = (props: RouteComponentProps) => {
               case 2:
                 toaster.danger(t('signin:form_error_ssh_login'))
                 break
+              case 3: {
+                // unknown host key: ask, as ssh does on first connect
+                const { type, fingerprint } = response.data.addition
+                if (
+                  window.confirm(
+                    t('signin:hostkey_unknown', {
+                      host,
+                      port,
+                      type,
+                      fingerprint,
+                    }),
+                  )
+                ) {
+                  localStorage.setItem(hostKeyItem(host, port), fingerprint)
+                  retry = true
+                }
+                break
+              }
+              case 4: {
+                // host key differs from the remembered (or server known_hosts) key: refuse
+                const { type, fingerprint } = response.data.addition
+                toaster.danger(t('signin:hostkey_changed_title'), {
+                  description: t('signin:hostkey_changed', {
+                    host,
+                    port,
+                    type,
+                    fingerprint,
+                  }),
+                  duration: 60,
+                })
+                if (
+                  localStorage.getItem(hostKeyItem(host, port)) &&
+                  window.confirm(t('signin:hostkey_forget', { host, port }))
+                ) {
+                  localStorage.removeItem(hostKeyItem(host, port))
+                }
+                break
+              }
             }
           } else {
             if (!response.data.addition) {
@@ -226,6 +270,9 @@ const Signin = (props: RouteComponentProps) => {
           toaster.danger(t('signin:form_error_ssh_login'))
         }
         setSubmitLoading(false)
+        if (retry) {
+          doSignin()
+        }
       })
       .catch((e: Error) => {
         // self.$Loading.error();

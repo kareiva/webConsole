@@ -76,6 +76,13 @@ export default {
       form_error_remote_server: '服务器连接错误',
       form_error_ssh_login: '尝试ssh登录出错', // error test "who am i"
       signin_success: '登录成功!',
+      hostkey_unknown:
+        "无法确认主机 '{{host}}:{{port}}' 的真实性。\n{{type}} 密钥指纹为 {{fingerprint}}。\n确定要继续连接吗？",
+      hostkey_changed_title: '警告：远程主机标识已更改！',
+      hostkey_changed:
+        '有人可能正在窃听你的连接（中间人攻击）！{{host}}:{{port}} 现在的 {{type}} 主机密钥指纹为 {{fingerprint}}。已拒绝连接，未发送密码。',
+      hostkey_forget:
+        '仅当你确认 {{host}}:{{port}} 的主机密钥是合法更改时才继续：是否删除已保存的旧指纹？下次登录时将重新询问。',
     },
   },
   'en-US': {
@@ -156,6 +163,13 @@ export default {
       form_error_remote_server: 'Error connecting to remote server',
       form_error_ssh_login: 'Error to execute ssh login',
       signin_success: 'success!',
+      hostkey_unknown:
+        "The authenticity of host '{{host}}:{{port}}' can't be established.\n{{type}} key fingerprint is {{fingerprint}}.\nAre you sure you want to continue connecting?",
+      hostkey_changed_title: 'WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED!',
+      hostkey_changed:
+        'Someone could be eavesdropping on you right now (man-in-the-middle attack)! The {{type}} host key for {{host}}:{{port}} is now {{fingerprint}}. The connection was refused and no password was sent.',
+      hostkey_forget:
+        'Only if you know the host key of {{host}}:{{port}} was legitimately changed: forget the remembered fingerprint? You will be asked to confirm the new one on the next sign-in.',
     },
   },
 }
